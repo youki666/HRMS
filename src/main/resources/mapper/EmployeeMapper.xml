@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>  
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hrms.dao.EmployeeDao">
+    <sql id="table_name">tbl_emp</sql>
+    <sql id="select_fields">
+      emp_id, emp_name, emp_email, gender, department_id
+    </sql>
+    <sql id="select_withdept_fields">
+        emp_id, emp_name, emp_email, gender, department_id, dept_id, dept_leader, dept_name
+    </sql>
+
+    <resultMap id="withDeptResultMap" type="com.hrms.domain.Employee">
+        <id column="emp_id" property="empId"></id>
+        <result column="emp_name" property="empName"></result>
+        <result column="emp_email" property="empEmail"></result>
+        <result column="gender" property="gender"></result>
+        <result column="department_id" property="departmentId"></result>
+        <association property="department" column="department_id" javaType="com.hrms.domain.Department">
+            <id column="dept_id" property="deptId"></id>
+            <result column="dept_leader" property="deptLeader"></result>
+            <result column="dept_name" property="deptName"></result>
+        </association>
+    </resultMap>
+  <select id ="selectEmployeeById"  resultMap="withDeptResultMap">
+          select *  from tbl_emp where emp_id = #{empId}
+    </select>
+    <select id="selectEmployeeByName" resultMap="withDeptResultMap">
+      select *  from tbl_emp where emp_name = #{empName}
+    </select>
+    <update id="updateEmpById" parameterType="com.hrms.domain.Employee">
+        UPDATE   <include refid="table_name"></include>
+        SET
+        emp_email = #{employee.empEmail},
+        gender = #{employee.gender},
+        department_id = #{employee.departmentId}
+        WHERE
+        emp_id = #{empId}
+    </update>
+    <delete id="deleteEmpById">
+        delete from tbl_emp where emp_id = #{emp_id}
+    </delete>
+   
+     
+    <!--  查询员工列表-->
+        <select id="selectByLimitAndOffset" resultMap="withDeptResultMap">
+        SELECT
+         <include refid="select_withdept_fields"></include>
+        FROM
+        tbl_emp e
+        LEFT JOIN
+        tbl_dept d
+        ON
+        e.department_id = d.dept_id
+        ORDER BY e.emp_id
+        LIMIT #{offset}, #{limit}
+    </select>
+     <!-- 查询员工列表 -->
+   <!--  <select id ="countEmps"  resultType="Integer">
+          select count(*) from tbl_emp
+    </select> -->
+    <!-- 新增员工列表 -->
+    <!-- id更新单条记录 -->
+</mapper>
